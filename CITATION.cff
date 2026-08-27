@@ -1,13 +1,14 @@
 cff-version: 1.2.0
 message: >-
-  If you use this project, please cite the software metadata below and the
-  associated paper once its stable public citation is available. No source
-  release has been made yet.
+  Until final ACM publication metadata is available, please cite the associated
+  arXiv preprint using the preferred citation below. No source release has been
+  made yet.
 type: software
 title: MFEM Elasticity PA
 abstract: >-
   The maintained open-source software companion to "Shifting the Sweet Spot:
-  High-Performance Matrix-Free Method for High-Order Elasticity". This
+  High-Performance Matrix-Free Method for High-Order Elasticity", accepted for
+  publication in ACM Transactions on Architecture and Code Optimization. This
   repository is currently a documentation-only development preview.
 authors:
   - family-names: Chang
@@ -38,3 +39,34 @@ keywords:
   - linear elasticity
   - MFEM
   - geometric multigrid
+preferred-citation:
+  type: article
+  title: >-
+    Shifting the Sweet Spot: High-Performance Matrix-Free Method for High-Order
+    Elasticity
+  authors:
+    - family-names: Chang
+      given-names: Dali
+      orcid: "https://orcid.org/0009-0009-2565-1823"
+    - family-names: Zhang
+      given-names: Chong
+      orcid: "https://orcid.org/0009-0007-8730-6959"
+    - family-names: Zhang
+      given-names: Kaiqi
+      orcid: "https://orcid.org/0009-0006-7968-6130"
+    - family-names: Yang
+      given-names: Mingguan
+      orcid: "https://orcid.org/0000-0002-1496-7453"
+    - family-names: Li
+      given-names: Huiyuan
+      orcid: "https://orcid.org/0000-0002-6326-9926"
+    - family-names: Kong
+      given-names: Weiqiang
+      orcid: "https://orcid.org/0000-0003-4338-5927"
+  journal: arXiv
+  year: 2026
+  notes: >-
+    Accepted for publication in ACM Transactions on Architecture and Code
+    Optimization (TACO); final publisher metadata pending.
+  doi: "10.48550/arXiv.2601.08374"
+  url: "https://arxiv.org/abs/2601.08374"
