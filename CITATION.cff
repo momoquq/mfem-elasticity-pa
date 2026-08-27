@@ -6,7 +6,7 @@ message: >-
 type: software
 title: MFEM Elasticity PA
 abstract: >-
-  The maintained open-source software companion to "Shifting the Sweet Spot:
+  The open-source software companion to "Shifting the Sweet Spot:
   High-Performance Matrix-Free Method for High-Order Elasticity", accepted for
   publication in ACM Transactions on Architecture and Code Optimization. This
   repository is currently a documentation-only development preview.
