@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: >-
+  If you use this project, please cite the software metadata below and the
+  associated paper once its stable public citation is available. No source
+  release has been made yet.
+type: software
+title: MFEM Elasticity PA
+abstract: >-
+  The maintained open-source software companion to "Shifting the Sweet Spot:
+  High-Performance Matrix-Free Method for High-Order Elasticity". This
+  repository is currently a documentation-only development preview.
+authors:
+  - family-names: Chang
+    given-names: Dali
+    orcid: "https://orcid.org/0009-0009-2565-1823"
+  - family-names: Zhang
+    given-names: Chong
+    orcid: "https://orcid.org/0009-0007-8730-6959"
+  - family-names: Zhang
+    given-names: Kaiqi
+    orcid: "https://orcid.org/0009-0006-7968-6130"
+  - family-names: Yang
+    given-names: Mingguan
+    orcid: "https://orcid.org/0000-0002-1496-7453"
+  - family-names: Li
+    given-names: Huiyuan
+    orcid: "https://orcid.org/0000-0002-6326-9926"
+  - family-names: Kong
+    given-names: Weiqiang
+    orcid: "https://orcid.org/0000-0003-4338-5927"
+repository-code: "https://github.com/momoquq/mfem-elasticity-pa"
+url: "https://github.com/momoquq/mfem-elasticity-pa"
+license: BSD-3-Clause
+keywords:
+  - finite element method
+  - matrix-free
+  - partial assembly
+  - linear elasticity
+  - MFEM
+  - geometric multigrid
