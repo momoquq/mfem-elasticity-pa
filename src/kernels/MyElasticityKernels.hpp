@@ -20,7 +20,7 @@ namespace mfem
 namespace internal
 {
 
-/// Add the elasticity action on axis-aligned hexahedra (lexicographic, byNODES).
+// Add elasticity action
 template <int D1D, int Q1D>
 void My3DAddMultPA_(
     const int nDofs,
@@ -33,8 +33,7 @@ void My3DAddMultPA_(
     mfem::QuadratureFunction &QVec,
     mfem::Vector &y);
 
-/// Accumulate the element diagonal using tensor-product basis functions.
-/// QVec stores the weighted reference-direction tensor.
+// Assemble element diagonal
 template <int D1D, int Q1D>
 void My3DAssembleDiagonalPA_(
     const int nDofs,

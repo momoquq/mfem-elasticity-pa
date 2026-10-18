@@ -19,7 +19,7 @@
 namespace mfem
 {
 
-/// Isotropic elasticity integrator
+// Isotropic elasticity integrator
 class MyElasticityIntegrator : public BilinearFormIntegrator
 {
 protected:
@@ -35,24 +35,24 @@ protected:
  
     // PA extension
  
-    const DofToQuad *maps;         ///< Borrowed
-    const GeometricFactors *geom;  ///< Borrowed
+    const DofToQuad *maps;         // Borrowed
+    const GeometricFactors *geom;  // Borrowed
     int vdim, ndofs;
-    const FiniteElementSpace *fespace;   ///< Borrowed
+    const FiniteElementSpace *fespace;   // Borrowed
  
     std::unique_ptr<QuadratureSpace> q_space;
-    /// Quadrature coefficients
+    // Quadrature coefficients
     std::unique_ptr<CoefficientVector> lambda_quad, mu_quad;
-    /// Workspace vector
+    // Workspace vector
     std::unique_ptr<QuadratureFunction> q_vec;
  
-    /// Project material coefficients
+    // Project material coefficients
     void SetUpQuadratureSpaceAndCoefficients(const FiniteElementSpace &fes);
  
  public:
     MyElasticityIntegrator(Coefficient &l, Coefficient &m)
     { lambda = &l; mu = &m; }
-    /// Scaled material coefficients
+    // Scaled material coefficients
     MyElasticityIntegrator(Coefficient &m, real_t q_l, real_t q_m)
     { lambda = NULL; mu = &m; q_lambda = q_l; q_mu = q_m; }
  
@@ -69,7 +69,7 @@ protected:
  
     void AddMultTransposePA(const Vector &x, Vector &y) const override;
  
-    /// Compute stress
+    // Compute stress
     void ComputeElementFlux(const FiniteElement &el,
                             ElementTransformation &Trans,
                             Vector &u,
@@ -77,7 +77,7 @@ protected:
                             Vector &flux, bool with_coef = true,
                             const IntegrationRule *ir = NULL) override;
  
-    /// Compute strain energy
+    // Compute strain energy
     real_t ComputeFluxEnergy(const FiniteElement &fluxelem,
                              ElementTransformation &Trans,
                              Vector &flux, Vector *d_energy = NULL) override;
