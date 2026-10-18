@@ -194,9 +194,9 @@ void My3DAddMultPA_(
                         // Transform gradients
                         #pragma unroll(3)
                         for (int i = 0; i < 3; ++i) {
-                            grad_vec[c][i][qz][qy][qx] = J_inv[i][0]*grad_xi[0] + 
-                                                        J_inv[i][1]*grad_xi[1] + 
-                                                        J_inv[i][2]*grad_xi[2];
+                            grad_vec[c][i][qz][qy][qx] = J_inv[0][i]*grad_xi[0] +
+                                                        J_inv[1][i]*grad_xi[1] +
+                                                        J_inv[2][i]*grad_xi[2];
                         }
                     }
                 }
