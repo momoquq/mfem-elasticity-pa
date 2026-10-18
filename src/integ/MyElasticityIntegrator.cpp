@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2010-2025, Lawrence Livermore National Security, LLC. Produced
-// at the Lawrence Livermore National Laboratory. All Rights reserved. See files
-// LICENSE and NOTICE for details. LLNL-CODE-806117.
+// at the Lawrence Livermore National Laboratory. All Rights reserved. See
+// LICENSE for details. LLNL-CODE-806117.
 //
 // This file is part of the MFEM library. For more information and source code
 // availability visit https://mfem.org.
