@@ -6,6 +6,7 @@
 MFEM_INSTALL_DIR ?= /usr/local
 include $(MFEM_INSTALL_DIR)/share/mfem/config.mk
 MFEM_INC_DIR = $(MFEM_INSTALL_DIR)/include
+MFEM_LIB_DIR = $(MFEM_INSTALL_DIR)/lib
 
 # Compiler options
 PLATFORM ?= generic
@@ -28,11 +29,24 @@ LIBRARY = $(OUTPUT_DIR)/libmfem_elasticity_pa.a
 SOURCES = src/integ/MyElasticityIntegrator.cpp \
           src/kernels/MyElasticityKernels.cpp
 OBJECTS = $(addprefix $(OUTPUT_DIR)/,$(SOURCES:.cpp=.o))
-DEPS = $(OBJECTS:.o=.d)
+EXECUTABLE = $(OUTPUT_DIR)/myex2
+DRIVER_OBJECT = $(OUTPUT_DIR)/myex2.o
+DEPS = $(OBJECTS:.o=.d) $(DRIVER_OBJECT:.o=.d)
 
 # Build
-.PHONY: all clean
+.PHONY: all myex2 clean
 all: $(LIBRARY)
+
+ifeq ($(MFEM_USE_MPI),YES)
+all: myex2
+myex2: $(EXECUTABLE)
+
+$(EXECUTABLE): $(DRIVER_OBJECT) $(LIBRARY)
+	$(MFEM_CXX) $(MFEM_CXXFLAGS) $(MY_FLAGS) $(PLATFORM_FLAGS) $^ $(MFEM_LIBS) -o $@
+else
+myex2:
+	$(error myex2 requires an MPI-enabled MFEM installation)
+endif
 
 $(LIBRARY): $(OBJECTS)
 	$(AR) rcs $@ $^
@@ -43,6 +57,6 @@ $(OUTPUT_DIR)/%.o: %.cpp makefile
 
 # Clean
 clean:
-	rm -f $(LIBRARY) $(OBJECTS) $(DEPS)
+	rm -f $(LIBRARY) $(OBJECTS) $(DRIVER_OBJECT) $(EXECUTABLE) $(DEPS)
 
 -include $(DEPS)
