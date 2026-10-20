@@ -22,28 +22,36 @@
 using namespace std;
 using namespace mfem;
 
-// SIMD configuration
-void checkSIMD()
+// Affine geometry
+void checkAffineMesh(Mesh &mesh)
 {
-   unsigned int n_vect_doubles = 0;
-
-#if defined(__AVX512F__)
-   n_vect_doubles = 512 / (8 * sizeof(double));
-   std::cout << "AVX-512 supported: " << n_vect_doubles << " doubles (512 bits)" << std::endl;
-#elif defined(__AVX2__)
-   n_vect_doubles = 256 / (8 * sizeof(double));
-   std::cout << "AVX2 supported: " << n_vect_doubles << " doubles (256 bits)" << std::endl;
-#elif defined(__AVX__)
-   n_vect_doubles = 256 / (8 * sizeof(double));
-   std::cout << "AVX supported: " << n_vect_doubles << " doubles (256 bits)" << std::endl;
-#elif defined(__ARM_NEON)
-   n_vect_doubles = 128 / (8 * sizeof(double));
-   std::cout << "NEON supported: " << n_vect_doubles << " doubles (128 bits)" << std::endl;
-#elif defined(__ARM_FEATURE_SVE)
-   std::cout << "SVE supported: Scalable vector extension detected" << std::endl;
-#else
-   std::cout << "No SIMD support detected" << std::endl;
-#endif
+   const real_t rtol = 64 * std::numeric_limits<real_t>::epsilon();
+   for (int e = 0; e < mesh.GetNE(); ++e)
+   {
+      ElementTransformation *T = mesh.GetElementTransformation(e);
+      const IntegrationRule &ir = IntRules.Get(T->GetGeometryType(),
+                                               2 * T->OrderJ());
+      T->SetIntPoint(&ir.IntPoint(0));
+      const DenseMatrix J0(T->Jacobian());
+      const int geometry_dofs = mesh.GetNodes()
+                                ? mesh.GetNodalFESpace()->GetFE(e)->GetDof()
+                                : mesh.GetElement(e)->GetNVertices();
+      const real_t tol = rtol * geometry_dofs * J0.MaxMaxNorm();
+      for (int q = 0; q < ir.GetNPoints(); ++q)
+      {
+         T->SetIntPoint(&ir.IntPoint(q));
+         const DenseMatrix &J = T->Jacobian();
+         for (int i = 0; i < J.Height(); ++i)
+         {
+            for (int j = 0; j < J.Width(); ++j)
+            {
+               MFEM_VERIFY(std::abs(J(i, j) - J0(i, j)) <= tol,
+                           "Non-affine element " << e
+                           << ": optimized PA requires affine geometry.");
+            }
+         }
+      }
+   }
 }
 
 // Geometric multigrid
@@ -177,9 +185,6 @@ int main(int argc, char *argv[])
    int myid = Mpi::WorldRank();
    Hypre::Init();
 
-   if(myid == 0)
-      checkSIMD();
-
    MPI_Barrier(MPI_COMM_WORLD);
 
    StopWatch total_timer;
@@ -259,6 +264,20 @@ int main(int argc, char *argv[])
            << "two boundary attributes! (See schematic in ex2.cpp)\n"
            << endl;
       return 3;
+   }
+
+   // Check affine geometry
+   if (pa && op && (geometric_refinements > 0 || order_refinements > 1))
+   {
+      setup_timer.Stop();
+      total_timer.Stop();
+      if (myid == 0)
+      {
+         checkAffineMesh(*mesh);
+      }
+      MPI_Barrier(MPI_COMM_WORLD);
+      total_timer.Start();
+      setup_timer.Start();
    }
 
    // Refine mesh
