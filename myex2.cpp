@@ -185,14 +185,6 @@ int main(int argc, char *argv[])
    int myid = Mpi::WorldRank();
    Hypre::Init();
 
-   MPI_Barrier(MPI_COMM_WORLD);
-
-   StopWatch total_timer;
-   total_timer.Start();
-
-   StopWatch setup_timer;
-   setup_timer.Start();
-
    // Parse options
    const char *mesh_file = "../mfem/data/beam-hex.mesh";
    int order = 1;
@@ -269,16 +261,14 @@ int main(int argc, char *argv[])
    // Check affine geometry
    if (pa && op && (geometric_refinements > 0 || order_refinements > 1))
    {
-      setup_timer.Stop();
-      total_timer.Stop();
       if (myid == 0)
       {
          checkAffineMesh(*mesh);
       }
-      MPI_Barrier(MPI_COMM_WORLD);
-      total_timer.Start();
-      setup_timer.Start();
    }
+
+   MPI_Barrier(MPI_COMM_WORLD);
+   const double t_start = MPI_Wtime();
 
    // Refine mesh
    {
@@ -341,28 +331,6 @@ int main(int argc, char *argv[])
       fespaces->AddOrderRefinedLevel(collections.Last(), dim, Ordering::byNODES);
    }
 
-   // Print hierarchy
-   HYPRE_BigInt size = fespaces->GetFinestFESpace().GlobalTrueVSize();
-
-   if (myid == 0)
-   {
-      cout << "=========================" << endl;
-      cout << "Multigrid hierarchy:" << endl;
-      cout << "Levels: " << fespaces->GetNumLevels() << endl;
-      cout << "Total DOFs: " << size << endl;
-      for (int level = 0; level < fespaces->GetNumLevels(); ++level)
-      {
-         ParFiniteElementSpace &space = fespaces->GetFESpaceAtLevel(level);
-         HYPRE_BigInt level_dofs = space.GlobalTrueVSize();
-         int level_order = space.FEColl()->GetOrder();
-         int num_elements = space.GetNE();
-         cout << "Level " << level << ": order = " << level_order
-              << ", global DOFs = " << level_dofs
-              << ", local elements = " << num_elements << endl;
-      }
-      cout << "=========================" << endl;
-   }
-
    // Boundary load
    VectorArrayCoefficient f(dim);
    for (int i = 0; i < dim-1; i++)
@@ -410,70 +378,80 @@ int main(int argc, char *argv[])
    ess_bdr = 0;
    ess_bdr[0] = 1;
 
-   setup_timer.Stop();
-
-   StopWatch assemble_timer;
-   StopWatch setup_muitgrid_timer;
-   StopWatch formfls_timer;
-   StopWatch solver_timer;
-
-   assemble_timer.Start();
-
    // Assemble right-hand side
    b->Assemble();
-
-   assemble_timer.Stop();
 
    // Apply boundary values
    x.ProjectBdrCoefficient(zero_vec_coeff, ess_bdr);
 
-   setup_muitgrid_timer.Start();
+   const double t_setup = MPI_Wtime();
 
    // Construct multigrid
    ElasticityMultigrid* M = new ElasticityMultigrid(*fespaces, ess_bdr, lambda_func, mu_func, pa, op);
    M->SetCycleType(Multigrid::CycleType::VCYCLE, 1, 1);
 
-   setup_muitgrid_timer.Stop();
-
    OperatorPtr A;
    Vector B, X;
-
-   formfls_timer.Start();
 
    // Form linear system
    M->FormFineLinearSystem(x, *b, A, X, B);
 
-   formfls_timer.Stop();
-
-   solver_timer.Start();
+   const double t_assembly = MPI_Wtime();
 
    // Solve
    CGSolver pcg(MPI_COMM_WORLD);
    pcg.SetRelTol(1e-6);
    pcg.SetMaxIter(2000);
-   pcg.SetPrintLevel(1);
+   pcg.SetPrintLevel(-1);
    pcg.SetOperator(*A);
    pcg.SetPreconditioner(*M);
 
    pcg.Mult(B, X);
 
-   solver_timer.Stop();
+   const double t_solve = MPI_Wtime();
+
+   // Collect timings
+   const double local_times[] = {t_setup - t_start, t_assembly - t_setup,
+                                 t_solve - t_assembly, t_solve - t_start};
+   double times[4];
+   MPI_Reduce(local_times, times, 4, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+
+   // Print hierarchy
+   HYPRE_BigInt size = fespaces->GetFinestFESpace().GlobalTrueVSize();
 
    if (myid == 0)
    {
-      cout << "Setup time: " << setup_timer.RealTime() << " seconds" << endl;
-      cout << "Right-hand side assembly time: " << assemble_timer.RealTime()
-           << " seconds" << endl;
-      cout << "Multigrid setup time: " << setup_muitgrid_timer.RealTime()
-           << " seconds" << endl;
-      cout << "Linear system assembly time: " << formfls_timer.RealTime()
-           << " seconds" << endl;
-      cout << "Solve time: " << solver_timer.RealTime() << " seconds" << endl;
-      cout << "PCG iterations: " << pcg.GetNumIterations() << endl;
-      cout << "PCG relative residual: " << pcg.GetFinalRelNorm() << endl;
-      cout << "Combined time: " << setup_timer.RealTime() + assemble_timer.RealTime() +
-              setup_muitgrid_timer.RealTime() + formfls_timer.RealTime() +
-              solver_timer.RealTime() << " seconds" << endl;
+      cout << "=========================" << endl;
+      cout << "Multigrid hierarchy:" << endl;
+      cout << "Levels: " << fespaces->GetNumLevels() << endl;
+      cout << "Total DOFs: " << size << endl;
+      for (int level = 0; level < fespaces->GetNumLevels(); ++level)
+      {
+         ParFiniteElementSpace &space = fespaces->GetFESpaceAtLevel(level);
+         HYPRE_BigInt level_dofs = space.GlobalTrueVSize();
+         int level_order = space.FEColl()->GetOrder();
+         int num_elements = space.GetNE();
+         cout << "Level " << level << ": order = " << level_order
+              << ", global DOFs = " << level_dofs
+              << ", local elements = " << num_elements << endl;
+      }
+      cout << "=========================" << endl;
+   }
+
+   // Print timings
+   if (myid == 0)
+   {
+      ostringstream report;
+      report << "\nTiming (max over MPI ranks)\n"
+             << fixed << setprecision(3)
+             << "  Setup:    " << times[0] << " s\n"
+             << "  Assembly: " << times[1] << " s\n"
+             << "  Solve:    " << times[2] << " s\n"
+             << "  Total:    " << times[3] << " s\n"
+             << "\nPCG iterations:        " << pcg.GetNumIterations() << '\n'
+             << scientific
+             << "PCG relative residual: " << pcg.GetFinalRelNorm() << '\n';
+      cout << report.str() << flush;
    }
 
    // Recover solution
@@ -505,10 +483,6 @@ int main(int argc, char *argv[])
       sol_sock << "solution\n" << *fespaces->GetFinestFESpace().GetParMesh()
                << x << flush;
    }
-
-   total_timer.Stop();
-   if (myid == 0)
-      cout << "Total time: " << total_timer.RealTime() << " seconds" << endl;
 
    // Clean up
    delete M;
