@@ -116,6 +116,23 @@ mpirun -np 2 ./build/generic/myex2 \
 | `-op` / `-no-op` | 选择优化的 / MFEM 的线弹性 integrator |
 | `-no-vis` | 关闭 GLVis 可视化 |
 
+## 清理与重新编译
+
+在仓库根目录，清理 AMD 配置的编译产物及生成的网格和解文件：
+
+```bash
+make clean PLATFORM=amd
+```
+
+清理所有平台的编译产物并重新编译：
+
+```bash
+make distclean
+make -j MFEM_INSTALL_DIR=/path/to/mfem-install PLATFORM=amd
+```
+
+若设置了自定义 `BUILD_DIR`，清理与编译时使用相同的路径。
+
 ## 源码结构
 
 | 路径 | 内容 |

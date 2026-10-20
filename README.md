@@ -116,6 +116,23 @@ mpirun -np 2 ./build/generic/myex2 \
 | `-op` / `-no-op` | Select the optimized / MFEM elasticity integrator |
 | `-no-vis` | Disable GLVis visualization |
 
+## Clean and rebuild
+
+From the repository root, clean the AMD build and the generated mesh and solution files:
+
+```bash
+make clean PLATFORM=amd
+```
+
+Clean all build profiles and rebuild:
+
+```bash
+make distclean
+make -j MFEM_INSTALL_DIR=/path/to/mfem-install PLATFORM=amd
+```
+
+For a custom `BUILD_DIR`, use the same path in the clean and build commands.
+
 ## Source layout
 
 | Path | Content |
