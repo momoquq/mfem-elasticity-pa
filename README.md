@@ -100,7 +100,7 @@ Use `beam-hex.mesh` from the [MFEM 4.8 source tree](https://github.com/mfem/mfem
 ```bash
 mpirun -np 2 ./build/generic/myex2 \
   -m /path/to/mfem/data/beam-hex.mesh \
-  -r 0 -gr 0 -or 2 -pa -op -no-vis
+  -r 0 -gr 0 -or 2 -pa -op
 ```
 
 `-m` points to the MFEM mesh data. Replace `-op` with `-no-op` to select MFEM's elasticity integrator.
@@ -114,7 +114,7 @@ mpirun -np 2 ./build/generic/myex2 \
 | `-or <p>` | Finest polynomial degree in the multigrid hierarchy |
 | `-pa` | Enable Partial Assembly on the fine multigrid levels |
 | `-op` / `-no-op` | Select the optimized / MFEM elasticity integrator |
-| `-no-vis` | Disable GLVis visualization |
+| `-save` / `-no-save` | Enable / disable saving mesh and solution files |
 
 ## Clean and rebuild
 

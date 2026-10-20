@@ -100,7 +100,7 @@ make -j MFEM_INSTALL_DIR=/path/to/mfem-install PLATFORM=amd
 ```bash
 mpirun -np 2 ./build/generic/myex2 \
   -m /path/to/mfem/data/beam-hex.mesh \
-  -r 0 -gr 0 -or 2 -pa -op -no-vis
+  -r 0 -gr 0 -or 2 -pa -op
 ```
 
 `-m` 指向 MFEM 网格数据。把 `-op` 改为 `-no-op` 即可选择 MFEM 的线弹性 integrator。
@@ -114,7 +114,7 @@ mpirun -np 2 ./build/generic/myex2 \
 | `-or <p>` | 多重网格层次中最细层的多项式阶数 |
 | `-pa` | 在多重网格细层启用 Partial Assembly |
 | `-op` / `-no-op` | 选择优化的 / MFEM 的线弹性 integrator |
-| `-no-vis` | 关闭 GLVis 可视化 |
+| `-save` / `-no-save` | 开启 / 关闭网格和解文件保存 |
 
 ## 清理与重新编译
 
