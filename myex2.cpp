@@ -181,7 +181,6 @@ int main(int argc, char *argv[])
 {
    // Initialize MPI and HYPRE
    Mpi::Init(argc, argv);
-   int num_procs = Mpi::WorldSize();
    int myid = Mpi::WorldRank();
    Hypre::Init();
 
@@ -193,7 +192,7 @@ int main(int argc, char *argv[])
    int order_refinements = 0;
    bool pa = false;
    const char *device_config = "cpu";
-   bool visualization = false;
+   bool save_solution = false;
    bool op = false;
 
    OptionsParser args(argc, argv);
@@ -213,9 +212,8 @@ int main(int argc, char *argv[])
                   "--no-partial-assembly", "Enable Partial Assembly.");
    args.AddOption(&device_config, "-d", "--device",
                   "Device configuration string, see Device::Configure().");
-   args.AddOption(&visualization, "-vis", "--visualization", "-no-vis",
-                  "--no-visualization",
-                  "Enable or disable GLVis visualization.");
+   args.AddOption(&save_solution, "-save", "--save-solution", "-no-save",
+                  "--no-save-solution", "Save mesh and solution.");
    args.Parse();
    if (!args.Good())
    {
@@ -454,11 +452,11 @@ int main(int argc, char *argv[])
       cout << report.str() << flush;
    }
 
-   // Recover solution
-   M->RecoverFineFEMSolution(X, *b, x);
-
    // Save mesh and solution
+   if (save_solution)
    {
+      M->RecoverFineFEMSolution(X, *b, x);
+
       ostringstream mesh_name, sol_name;
       mesh_name << "mesh." << setfill('0') << setw(6) << myid;
       sol_name << "sol." << setfill('0') << setw(6) << myid;
@@ -470,18 +468,6 @@ int main(int argc, char *argv[])
       ofstream sol_ofs(sol_name.str().c_str());
       sol_ofs.precision(8);
       x.Save(sol_ofs);
-   }
-
-   // Visualize
-   if (visualization)
-   {
-      char vishost[] = "localhost";
-      int  visport   = 19916;
-      socketstream sol_sock(vishost, visport);
-      sol_sock << "parallel " << num_procs << " " << myid << "\n";
-      sol_sock.precision(8);
-      sol_sock << "solution\n" << *fespaces->GetFinestFESpace().GetParMesh()
-               << x << flush;
    }
 
    // Clean up
