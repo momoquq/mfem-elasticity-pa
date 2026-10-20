@@ -1,7 +1,9 @@
 /build/
 /build-*/
-/cmake-build-*/
-/CMakeUserPresets.json
+
+/mesh.[0-9]*
+/sol.[0-9]*
+
 /.cache/
 .DS_Store
 *~

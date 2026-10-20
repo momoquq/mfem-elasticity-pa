@@ -4,7 +4,9 @@
 
 # MFEM configuration
 MFEM_INSTALL_DIR ?= /usr/local
+ifneq ($(filter-out clean distclean,$(or $(MAKECMDGOALS),all)),)
 include $(MFEM_INSTALL_DIR)/share/mfem/config.mk
+endif
 MFEM_INC_DIR = $(MFEM_INSTALL_DIR)/include
 MFEM_LIB_DIR = $(MFEM_INSTALL_DIR)/lib
 
@@ -34,7 +36,7 @@ DRIVER_OBJECT = $(OUTPUT_DIR)/myex2.o
 DEPS = $(OBJECTS:.o=.d) $(DRIVER_OBJECT:.o=.d)
 
 # Build
-.PHONY: all myex2 clean
+.PHONY: all myex2 clean distclean
 all: $(LIBRARY)
 
 ifeq ($(MFEM_USE_MPI),YES)
@@ -57,6 +59,12 @@ $(OUTPUT_DIR)/%.o: %.cpp makefile
 
 # Clean
 clean:
-	rm -f $(LIBRARY) $(OBJECTS) $(DRIVER_OBJECT) $(EXECUTABLE) $(DEPS)
+	rm -rf -- "$(OUTPUT_DIR)"
+	rm -f -- mesh.[0-9]* sol.[0-9]*
+
+distclean:
+	rm -rf -- "$(BUILD_DIR)/generic" "$(BUILD_DIR)/amd" "$(BUILD_DIR)/arm"
+	rm -f -- mesh.[0-9]* sol.[0-9]*
+	@rmdir -- "$(BUILD_DIR)" 2>/dev/null || true
 
 -include $(DEPS)
