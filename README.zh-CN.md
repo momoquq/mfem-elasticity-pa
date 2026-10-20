@@ -16,16 +16,17 @@
 
 在 `p ∈ {1, 2, 4, 8}` 范围内，[论文](https://dl.acm.org/doi/full/10.1145/3844725)在 AMD EPYC 7713 上报告了 `7–83×` kernel 加速和 `3.6–16.8×` 端到端加速。operator-throughput sweet spot 移动到 `p ≥ 6`，并在 Huawei Kunpeng 920（ARMv8.2）上观察到相同趋势。这些数字来自论文中的实验。
 
-## 依赖
+## 依赖项
 
 - 启用 MPI 并链接 HYPRE 2.31.0 和 [METIS 5.1.0](https://github.com/mfem/tpls) 的 MFEM 4.8。
 
-<details><summary>构建依赖（AMD Zen 3）</summary>
+## 编译依赖项（AMD Zen 3）
 
 在已配置 MPI 工具链、Make 和 CMake 的环境中，选择单独的工作目录执行以下命令。示例采用实验中的 AMD 编译选项；其他 CPU 请相应调整 `CMAKE_CXX_FLAGS`。
 
+### 1. HYPRE 2.31.0
+
 ```bash
-# HYPRE
 wget https://github.com/hypre-space/hypre/archive/v2.31.0.tar.gz
 tar -xzf v2.31.0.tar.gz
 (
@@ -34,8 +35,11 @@ tar -xzf v2.31.0.tar.gz
   make -j$(nproc)
   make install
 )
+```
 
-# METIS
+### 2. METIS 5.1.0
+
+```bash
 git clone https://github.com/mfem/tpls.git
 tar -xzf tpls/metis-5.1.0.tar.gz
 (
@@ -44,8 +48,11 @@ tar -xzf tpls/metis-5.1.0.tar.gz
   make -j$(nproc)
   make install
 )
+```
 
-# MFEM
+### 3. MFEM 4.8
+
+```bash
 git clone --branch v4.8 https://github.com/mfem/mfem.git
 (
   cd mfem
@@ -62,11 +69,9 @@ git clone --branch v4.8 https://github.com/mfem/mfem.git
 )
 ```
 
-MFEM 安装在 `mfem/mfem/` 中。下文的 `MFEM_INSTALL_DIR` 使用该目录的绝对路径。其他配置见 [MFEM 4.8 构建说明](https://github.com/mfem/mfem/blob/v4.8/INSTALL)。
+MFEM 安装在 `mfem/mfem/` 中。下文的 `MFEM_INSTALL_DIR` 使用该目录的绝对路径。其他配置见 [MFEM 4.8 编译说明](https://github.com/mfem/mfem/blob/v4.8/INSTALL)。
 
-</details>
-
-## 构建
+## 编译本项目
 
 在仓库根目录执行：
 
@@ -74,7 +79,7 @@ MFEM 安装在 `mfem/mfem/` 中。下文的 `MFEM_INSTALL_DIR` 使用该目录�
 make -j MFEM_INSTALL_DIR=/path/to/mfem-install
 ```
 
-通过 `PLATFORM` 选择构建配置：
+通过 `PLATFORM` 选择编译配置：
 
 | 选项 | 目标平台 | 输出目录 |
 |---|---|---|
@@ -118,7 +123,7 @@ mpirun -np 2 ./build/generic/myex2 \
 | `src/kernels/` | 线弹性 action 与对角组装 kernel |
 | `src/integ/` | MFEM integrator |
 | `myex2.cpp` | GMG-PCG 线弹性驱动 |
-| `makefile` | 库与驱动的构建入口 |
+| `makefile` | 库与驱动的编译入口 |
 
 ## 引用
 

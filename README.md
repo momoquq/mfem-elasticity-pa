@@ -20,12 +20,13 @@ Across `p ∈ {1, 2, 4, 8}`, the [paper](https://dl.acm.org/doi/full/10.1145/384
 
 - An MPI-enabled MFEM 4.8 with HYPRE 2.31.0 and [METIS 5.1.0](https://github.com/mfem/tpls).
 
-<details><summary>Build dependencies (AMD Zen 3)</summary>
+## Build dependencies (AMD Zen 3)
 
 Run the following in a separate working directory with an MPI toolchain, Make, and CMake available. This example uses the AMD compiler flags from the experiments; adjust `CMAKE_CXX_FLAGS` for other CPUs.
 
+### 1. HYPRE 2.31.0
+
 ```bash
-# HYPRE
 wget https://github.com/hypre-space/hypre/archive/v2.31.0.tar.gz
 tar -xzf v2.31.0.tar.gz
 (
@@ -34,8 +35,11 @@ tar -xzf v2.31.0.tar.gz
   make -j$(nproc)
   make install
 )
+```
 
-# METIS
+### 2. METIS 5.1.0
+
+```bash
 git clone https://github.com/mfem/tpls.git
 tar -xzf tpls/metis-5.1.0.tar.gz
 (
@@ -44,8 +48,11 @@ tar -xzf tpls/metis-5.1.0.tar.gz
   make -j$(nproc)
   make install
 )
+```
 
-# MFEM
+### 3. MFEM 4.8
+
+```bash
 git clone --branch v4.8 https://github.com/mfem/mfem.git
 (
   cd mfem
@@ -64,9 +71,7 @@ git clone --branch v4.8 https://github.com/mfem/mfem.git
 
 MFEM is installed in `mfem/mfem/`. Use its absolute path as `MFEM_INSTALL_DIR` below. For other configurations, see the [MFEM 4.8 build instructions](https://github.com/mfem/mfem/blob/v4.8/INSTALL).
 
-</details>
-
-## Build
+## Build this project
 
 From the repository root:
 
